@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: A4;
+    margin: 1.4cm 1.3cm;
+    @bottom-center {
+      content: "釜山一家四口 · 2026/7/1–7/5 · 第 " counter(page) " 頁";
+      font-family: 'Noto Sans CJK TC';
+      font-size: 8pt;
+      color: #94a3b8;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans CJK TC', sans-serif;
+    color: #1e293b;
+    font-size: 10.2pt;
+    line-height: 1.6;
+  }
+  /* ---------- Cover ---------- */
+  .cover {
+    background: linear-gradient(135deg, #0e7490 0%, #0d9488 60%, #14b8a6 100%);
+    color: #fff;
+    padding: 30px 32px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+  }
+  .cover .eyebrow { font-size: 10pt; letter-spacing: 3px; opacity: .85; }
+  .cover h1 { font-size: 27pt; font-weight: 900; margin: 6px 0 4px; }
+  .cover .sub { font-size: 12pt; opacity: .95; }
+  .cover .meta {
+    margin-top: 16px; display: flex; gap: 26px; flex-wrap: wrap;
+    font-size: 9.5pt;
+  }
+  .cover .meta b { display:block; font-size: 8pt; opacity:.8; font-weight:600; letter-spacing:1px; margin-bottom:2px;}
+  /* ---------- Info cards ---------- */
+  .info-grid { display: flex; gap: 10px; margin-bottom: 16px; }
+  .info-card {
+    flex: 1; border: 1px solid #e2e8f0; border-radius: 10px; padding: 11px 13px;
+    background: #f8fafc;
+  }
+  .info-card h3 { font-size: 9pt; color: #0f766e; letter-spacing:1px; margin-bottom: 5px; }
+  .info-card p { font-size: 8.6pt; color: #475569; line-height: 1.5; }
+  /* ---------- Flights ---------- */
+  .flights {
+    border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 18px; background:#fff;
+  }
+  .flights h2 { font-size: 11pt; color:#0e7490; margin-bottom: 8px; }
+  .flight-row { display:flex; align-items:center; gap:14px; padding: 5px 0; font-size:9.4pt;}
+  .flight-row + .flight-row { border-top: 1px dashed #e2e8f0; }
+  .flight-tag { background:#ecfeff; color:#0e7490; font-weight:700; border-radius:6px; padding:2px 8px; font-size:8.4pt; white-space:nowrap;}
+  .flight-time { font-weight:800; font-size:11pt; color:#0f172a; }
+  .flight-mid { color:#64748b; font-size:8.4pt; }
+  /* ---------- Day blocks ---------- */
+  .day { margin-bottom: 14px; page-break-inside: avoid; }
+  .day-head {
+    display:flex; align-items:center; gap:12px;
+    background: #0f766e; color:#fff; border-radius: 10px 10px 0 0;
+    padding: 9px 14px;
+  }
+  .day-num {
+    background: rgba(255,255,255,.18); border-radius: 8px;
+    width: 42px; height: 42px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    line-height:1;
+  }
+  .day-num small { font-size:6.5pt; opacity:.85; }
+  .day-num b { font-size:17pt; font-weight:900; }
+  .day-head .dh-title { font-size: 13pt; font-weight: 800; }
+  .day-head .dh-sub { font-size: 8.6pt; opacity: .9; }
+  .day-body {
+    border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 10px 10px;
+    padding: 6px 0;
+  }
+  .slot { display:flex; gap: 12px; padding: 7px 14px; }
+  .slot + .slot { border-top: 1px solid #f1f5f9; }
+  .slot-time {
+    flex: 0 0 52px; font-weight:800; color:#0e7490; font-size:9.2pt; padding-top:1px;
+  }
+  .slot-body { flex: 1; }
+  .slot-body .t { font-weight:700; font-size:10pt; }
+  .slot-body .d { color:#475569; font-size:8.8pt; margin-top:1px; }
+  .slot-body .move { color:#b45309; font-size:8.4pt; margin-top:2px; }
+  .meal { color:#be185d; font-weight:700; }
+  /* ---------- Reminders ---------- */
+  .section-title { font-size: 13pt; font-weight:800; color:#0e7490; margin: 8px 0 9px; padding-bottom:4px; border-bottom: 2px solid #99f6e4;}
+  .rem { display:flex; gap:9px; padding:6px 0; font-size:9.2pt; border-bottom:1px solid #f1f5f9; }
+  .rem .ic { flex:0 0 18px; color:#0d9488; font-weight:900; }
+  .rem b { color:#0f172a; }
+  .tagline { color:#64748b; font-size:8.4pt; margin-top:10px; text-align:center;}
+  .pill { display:inline-block; background:#f0fdfa; color:#0f766e; border:1px solid #99f6e4; border-radius:20px; padding:1px 9px; font-size:8pt; font-weight:700;}
+  /* ---------- VBP badges ---------- */
+  .vbp { display:inline-block; border-radius:5px; padding:0 6px; font-size:7.6pt; font-weight:800; margin-left:5px; vertical-align:middle; white-space:nowrap;}
+  .vbp-p { background:#f3e8ff; color:#7c3aed; border:1px solid #d8b4fe; }
+  .vbp-b { background:#dbeafe; color:#2563eb; border:1px solid #93c5fd; }
+  .vbp-pay { background:#fef3c7; color:#b45309; border:1px solid #fcd34d; }
+  .vbp-48 { background:#cffafe; color:#0e7490; border:1px solid #67e8f9; }
+  .vbp-act { background:#0e7490; color:#fff; border:1px solid #0e7490; }
+  /* ---------- BIG5 box ---------- */
+  .big5box { border:1.5px solid #7c3aed; border-radius:12px; padding:13px 15px; margin-bottom:18px; background:#faf5ff; page-break-inside:avoid;}
+  .big5box h2 { font-size:12pt; color:#6d28d9; margin-bottom:3px; }
+  .big5box .sub { font-size:8.4pt; color:#7c3aed; margin-bottom:9px; }
+  .big5box table { width:100%; border-collapse:collapse; font-size:8.8pt; }
+  .big5box th { text-align:left; color:#6d28d9; font-size:8pt; border-bottom:1.5px solid #d8b4fe; padding:3px 4px;}
+  .big5box td { padding:4px; border-bottom:1px solid #ede9fe; }
+  .big5box td.price { text-align:right; font-weight:700; white-space:nowrap;}
+  .big5box .total td { border-top:1.5px solid #c4b5fd; border-bottom:none; font-weight:800; color:#6d28d9; }
+  .big5box .save { margin-top:9px; background:#7c3aed; color:#fff; border-radius:8px; padding:7px 11px; font-size:9pt; font-weight:700; }
+  .big5box .notes { margin-top:8px; font-size:8.2pt; color:#6b21a8; line-height:1.5;}
+  /* ---------- Fare page ---------- */
+  .fare-day { font-size:10pt; font-weight:800; color:#0f766e; margin:12px 0 4px; }
+  table.fare { width:100%; border-collapse:collapse; font-size:9pt; margin-bottom:4px; }
+  table.fare th { text-align:left; color:#0e7490; font-size:8pt; border-bottom:1.5px solid #99f6e4; padding:3px 6px; }
+  table.fare td { padding:4px 6px; border-bottom:1px solid #f1f5f9; }
+  table.fare td.r { text-align:right; white-space:nowrap; }
+  table.fare tr.sub td { border-top:1.5px solid #99f6e4; border-bottom:none; font-weight:800; color:#0f766e; }
+  .fare-total { margin-top:10px; background:#0f766e; color:#fff; border-radius:10px; padding:10px 14px; font-size:10pt; font-weight:800; }
+  .fare-note { margin-top:9px; font-size:8.4pt; color:#475569; line-height:1.6; }
+  .place-map {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: #14b8a6;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+  .place-map:hover { color: #0e7490; }
+  .ko-copy {
+    color: inherit;
+    border-bottom: 1px dotted #0d9488;
+    cursor: copy;
+  }
+  .ko-copy:hover { color: #0f766e; background: #ecfdf5; }
+  svg .place-map-svg { cursor: pointer; text-decoration: underline; }
+  svg .ko-copy-svg { cursor: copy; text-decoration: underline dotted; }
+  .copy-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%) translateY(12px);
+    z-index: 999;
+    background: #0f172a;
+    color: #fff;
+    border-radius: 999px;
+    padding: 7px 13px;
+    font-size: 9pt;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">BUSAN FAMILY TRIP · 釜山自由行</div>
+  <h1>釜山 5 天 4 夜 家庭行程</h1>
+  <div class="sub">一家四口 · 2026 年 7 月 1 日（三）～ 7 月 5 日（日）</div>
+  <div class="meta">
+    <div><b>成員</b>4 人（53 / 51 / 17 / 10 歲）</div>
+    <div><b>住宿基地</b>Sota Suites Hotel · 西面（서면）</div>
+    <div><b>航空</b>濟州航空（去 7C6154 / 回 7C6153）</div>
+    <div><b>主要交通</b>地鐵 + 計程車 + 機場巴士</div>
+  </div>
+</div>
+
+<div class="flights">
+  <h2>✈ 航班資訊（當地時間）</h2>
+  <div class="flight-row">
+    <span class="flight-tag">去程 7/1 三</span>
+    <span class="flight-time">02:50</span>
+    <span class="flight-mid">TPE 桃園 T1 ─ 2h20m ─►</span>
+    <span class="flight-time">06:10</span>
+    <span class="flight-mid">PUS 金海國際機場（김해국제공항） · 7C6154</span>
+  </div>
+  <div class="flight-row">
+    <span class="flight-tag">回程 7/5 日</span>
+    <span class="flight-time">22:00</span>
+    <span class="flight-mid">PUS 金海（김해） ─ 2h30m ─►</span>
+    <span class="flight-time">23:30</span>
+    <span class="flight-mid">TPE 桃園 T1 · 7C6153</span>
+  </div>
+</div>
+
+<div class="info-grid">
+  <div class="info-card">
+    <h3>交通卡</h3>
+    <p>全家辦 T-money / Cashbee，地鐵公車都能刷；轉乘金海輕軌（김해경전철）、東海線（동해선）一定要用卡。</p>
+  </div>
+  <div class="info-card">
+    <h3>釜山通行證 VBP</h3>
+    <p>用 48 小時券：7/2 傍晚搭遊艇時啟用，窗內(7/2 晚～7/4 下午)高價景點全免費。</p>
+  </div>
+  <div class="info-card">
+    <h3>天氣 · 7 月</h3>
+    <p>梅雨季又濕又熱，帶輕便雨具與防曬。海雲台（해운대）、機張（기장）遇雨可與 Day 5 室內行程對調。</p>
+  </div>
+  <div class="info-card">
+    <h3>務必先訂</h3>
+    <p>天空膠囊提前 1–4 週上網訂；X the Sky、Club D Oasis、ARTE 線上購票較便宜。</p>
+  </div>
+</div>
+
+<div class="big5box">
+  <h2>48 小時券攻略 · 啟用與窗內清單</h2>
+  <div class="sub">7/2 約 18:30 搭遊艇時啟用 → 視窗到 7/4 約 18:30；窗內景點刷 pass 全免費（每人 ₩85,000）</div>
+  <table>
+    <tr><th>景點</th><th>用在</th><th>狀態</th><th style="text-align:right;">原價/人</th></tr>
+    <tr><td>鑽石灣遊艇（龍湖灣 용호만）</td><td>7/2 傍晚</td><td>★ 啟用 48H</td><td class="price">₩35,000</td></tr>
+    <tr><td>Skyline Luge 斜坡滑車</td><td>7/3 上午</td><td>窗內免費</td><td class="price">₩27,000</td></tr>
+    <tr><td>Club D Oasis 汗蒸幕</td><td>7/3 下午</td><td>窗內免費</td><td class="price">₩30,000</td></tr>
+    <tr><td>Busan X the Sky</td><td>7/3 傍晚</td><td>窗內免費</td><td class="price">₩27,000</td></tr>
+    <tr><td>松島海上纜車（송도해상케이블카）</td><td>7/4 中午</td><td>窗內免費</td><td class="price">₩20,000</td></tr>
+    <tr><td>ARTE MUSEUM（影島 영도）</td><td>7/4 下午</td><td>窗內免費</td><td class="price">₩22,000</td></tr>
+    <tr class="total"><td colspan="3">窗內六項原價合計</td><td class="price">₩161,000</td></tr>
+  </table>
+  <div class="save">48 小時券 ₩85,000 → 窗內省 ₩76,000/人；另海岸列車單買 ₩12,000，實際總支出約 ₩97,000/人，比 BIG5 省約 ₩22,000（三位大人共省約 NT$1,430）。</div>
+  <div class="notes">
+    • <b>⚠ 7/4 ARTE 必須在視窗關閉前入場</b>（≈ 7/2 實際啟用時間 +48 小時）。排 16:00、18:00 前完成入場最穩；記下 7/2 刷遊艇的時間。<br>
+    • <b>7/1 不啟用</b>：那天只有可選的釜山塔，高價景點少，不浪費視窗。<br>
+    • <b>海岸列車（7/2 早）單買 ₩12,000</b>：便宜，不值得為它提早開窗（提早會讓 7/4 ARTE 落在窗外）。<br>
+    • <b>Club D</b> 買水樂園單票、汗蒸幕用 pass 免費；<b>天空膠囊</b>不含、需另購。<br>
+    • 48 小時<b>不限量</b>：Day 4 已順手加入<b>甘川洞（감천동）韓服、Flipbook 手翻書、太宗台（태종대）Danubi 列車</b>（皆窗內免費，未計入上方金額，等於再賺）；想多刷海洋博物館等也不用錢。
+  </div>
+</div>
+
+<!-- DAY 1 -->
+<div class="day">
+  <div class="day-head">
+    <div class="day-num"><small>DAY</small><b>1</b></div>
+    <div>
+      <div class="dh-title">抵達 + 南浦洞（남포동）收心</div>
+      <div class="dh-sub">7/1（三）· 清晨落地，輕鬆暖身，別排太硬</div>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="slot"><div class="slot-time">06:10</div><div class="slot-body"><div class="t">抵達金海機場（김해공항 / PUS）</div><div class="d">出關、領行李、辦 T-money 卡、換錢或領 WOWPASS。</div><div class="move">► 帶行李＋小孩又累，建議直接搭機場計程車或機場巴士到西面（서면，約 30–40 分、計程車約 ₩25,000–35,000）。輕軌轉地鐵較省錢但要搬行李換車。</div></div></div>
+    <div class="slot"><div class="slot-time">07:30</div><div class="slot-body"><div class="t">抵西面（서면） · 飯店寄放行李</div><div class="d">► 計程車/機場巴士到 Sota,先寄行李(check-in 通常下午 3 點)。</div></div></div>
+    <div class="slot"><div class="slot-time">08:00</div><div class="slot-body"><div class="t">早餐 · 補眠 · 等 check-in（～14:30）</div><div class="d"><span class="meal">早餐</span>附近吃豬肉湯飯或咖啡輕食;紅眼航班先回血,咖啡廳/飯店大廳緩一緩,午後再開始玩。</div></div></div>
+    <div class="slot"><div class="slot-time">16:30</div><div class="slot-body"><div class="t">南浦洞（남포동） · 光復路（광복로） · BIFF 廣場（BIFF 광장） · 國際市場（국제시장）</div><div class="d">商街逛街,國際市場（국제시장）、富平罐頭夜市（부평깡통시장）掃街。<span class="meal">小吃</span>:堂狗、忠武紫菜飯捲、種子糖餅(씨앗호떡)。</div><div class="move">► 西面站（서면역）搭 1 號線 → 南浦站（남포역，約 10 分）。</div></div></div>
+    <div class="slot"><div class="slot-time">18:30</div><div class="slot-body"><div class="t"><span class="meal">晚餐</span> 南浦洞（남포동）一帶</div><div class="d">豬肉湯飯、海鮮鍋或烤肉。</div></div></div>
+    <div class="slot"><div class="slot-time">19:30</div><div class="slot-body"><div class="t">龍頭山公園（용두산공원） · 釜山塔（부산타워）夜景（可選）<span class="vbp vbp-pay">單買 ₩8,000</span></div><div class="d">飯後可走龍頭山公園（용두산공원）上<b>釜山塔（부산타워）</b>看夜景(7/1 不啟用 pass,單買約 ₩8,000 或略過)。</div></div></div>
+    <div class="slot"><div class="slot-time">20:30</div><div class="slot-body"><div class="t">回西面（서면） · 早點休息</div><div class="d">養足體力迎接明天。</div></div></div>
+  </div>
+</div>
+
+<!-- DAY 2 -->
+<div class="day">
+  <div class="day-head">
+    <div class="day-num"><small>DAY</small><b>2</b></div>
+    <div>
+      <div class="dh-title">海雲台（해운대）海岸線 + 天空膠囊</div>
+      <div class="dh-sub">7/2（四）· 海邊一整天，傍晚廣安里（광안리）夜景</div>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="slot"><div class="slot-time">08:30</div><div class="slot-body"><div class="t">前往海雲台（해운대）</div><div class="d"><span class="meal">早餐</span>後出發。</div><div class="move">► 西面站（서면역）搭 2 號線（往萇山 장산方向）→ 海雲台站（해운대역），約 35–40 分。</div></div></div>
+    <div class="slot"><div class="slot-time">09:30</div><div class="slot-body"><div class="t">Blue Line Park（블루라인파크）天空膠囊 + 海岸列車<span class="vbp vbp-pay">海岸列車單買 ₩12,000</span></div><div class="d">建議尾浦（미포 / Mipo，海雲台海水浴場 해운대해수욕장東側）搭天空膠囊 → 青沙浦（청사포），再搭<b>海岸列車</b>回。網美打卡必拍。<b>海岸列車單買(便宜,不為它提早開 48H 窗);天空膠囊不含、需另外上網訂票！</b></div></div></div>
+    <div class="slot"><div class="slot-time">12:30</div><div class="slot-body"><div class="t">海雲台市場（해운대시장） · 午餐</div><div class="d"><span class="meal">午餐</span>市場小吃或周邊餐廳。</div></div></div>
+    <div class="slot"><div class="slot-time">14:00</div><div class="slot-body"><div class="t">海雲台海水浴場（해운대해수욕장） · 玩水/咖啡</div><div class="d">7 月戲水季,踏浪堆沙;太熱就找海景咖啡廳休息。</div></div></div>
+    <div class="slot"><div class="slot-time">16:30</div><div class="slot-body"><div class="t">The Bay 101（더베이101）拍照</div><div class="d">海雲台（해운대）地標,白天/黃昏都好拍,水中倒影名所,免門票。</div></div></div>
+    <div class="slot"><div class="slot-time">17:30</div><div class="slot-body"><div class="t">前往廣安里（광안리） / 龍湖灣遊艇碼頭（용호만 유람선터미널）</div><div class="d">► 移動到 Yongho Bay Cruise Terminal(龍湖灣遊艇碼頭 용호만 유람선터미널)準備搭船。</div></div></div>
+    <div class="slot"><div class="slot-time">18:30</div><div class="slot-body"><div class="t">鑽石灣遊艇（다이아몬드베이）<span class="vbp vbp-act">★ 啟用 48H</span></div><div class="d"><b>在此啟用 48 小時券</b>(視窗到 7/4 約 18:30)。<b>鑽石灣遊艇（다이아몬드베이）</b>(龍湖灣 용호만出發,航線經廣安大橋（광안대교）、The Bay,憑 pass 免費,<b>須先用官方 IG/LINE 預約</b>,夕陽/夜間場補約 ₩5,000)。<b>記下實際刷票時間,7/4 ARTE 要在此時間 +48 小時前入場。</b></div></div></div>
+    <div class="slot"><div class="slot-time">20:00</div><div class="slot-body"><div class="t"><span class="meal">晚餐</span> 廣安里（광안리） + 夜景</div><div class="d">廣安里（광안리）海邊餐廳,配廣安大橋（광안대교）夜景收尾。</div></div></div>
+    <div class="slot"><div class="slot-time">21:30</div><div class="slot-body"><div class="t">回西面（서면）</div><div class="d">► 廣安站（광안역）搭 2 號線直接回西面（서면）。</div></div></div>
+  </div>
+</div>
+
+<!-- DAY 3 -->
+<div class="day">
+  <div class="day-head">
+    <div class="day-num"><small>DAY</small><b>3</b></div>
+    <div>
+      <div class="dh-title">龍宮寺（용궁사） + Skyline Luge + Club D</div>
+      <div class="dh-sub">7/3（五）· 海景寺廟＋斜坡滑車＋玩水汗蒸幕，同棟看夜景</div>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="slot"><div class="slot-time">08:30</div><div class="slot-body"><div class="t">前往海東龍宮寺（해동용궁사 / 機張 기장）</div><div class="d"><span class="meal">早餐</span>後出發。機張（기장）地鐵到不了。</div><div class="move">► 一家四口建議直接叫計程車（西面 서면→龍宮寺 용궁사約 50–60 分），或 2 號線到海雲台站（해운대역）轉 181 號公車。</div></div></div>
+    <div class="slot"><div class="slot-time">09:30</div><div class="slot-body"><div class="t">海東龍宮寺（해동용궁사）</div><div class="d">建在海邊岩石上的廟，釜山最美海景廟。趁早涼快、人少又好拍。有些階梯，長輩慢慢走。</div></div></div>
+    <div class="slot"><div class="slot-time">11:00</div><div class="slot-body"><div class="t">Skyline Luge 斜坡滑車（스카이라인 루지 / 機張 기장）<span class="vbp vbp-48">48H 免費</span></div><div class="d">就在龍宮寺（용궁사）旁(走下坡約 12 分鐘),先搭空中纜車上山再駕滑車衝下來,老少咸宜。85cm 以上可共乘、6 歲/110cm 以上可自駕。憑 48H pass 免費玩 2 趟,現場刷票即可。</div></div></div>
+    <div class="slot"><div class="slot-time">12:30</div><div class="slot-body"><div class="t">移動到海雲台（해운대） LCT（엘시티） · 午餐</div><div class="d">► 機張（기장） → LCT 大樓（엘시티）計程車約 20–30 分。<span class="meal">午餐</span>：LCT 周邊或海雲台（해운대）。</div></div></div>
+    <div class="slot"><div class="slot-time">13:30</div><div class="slot-body"><div class="t">Club D Oasis（클럽디오아시스）水上樂園 + 汗蒸幕<span class="vbp vbp-48">汗蒸幕 48H 免費</span></div><div class="d">室內外水上樂園＋海景汗蒸幕，一家老少都適合。<b>水上樂園只開到 18:00，早點進去玩水</b>；120cm 以下小孩須穿救生衣（4F 櫃台租）。<span class="vbp vbp-pay">水樂園綜合票另購</span>，汗蒸幕憑 48H pass 免費(買水樂園單票即可)。</div></div></div>
+    <div class="slot"><div class="slot-time">18:30</div><div class="slot-body"><div class="t">Busan X the Sky（부산 엑스 더 스카이）夜景（同棟）<span class="vbp vbp-48">48H 免費</span></div><div class="d">泡完汗蒸幕直接上 98F 看夜景(憑 48H pass 免費)，全世界最高星巴克就在這。<span class="meal">晚餐</span>：海雲台（해운대）。</div></div></div>
+    <div class="slot"><div class="slot-time">21:00</div><div class="slot-body"><div class="t">回西面（서면）</div><div class="d">► 海雲台站（해운대역）搭 2 號線直接回西面（서면），或計程車。</div></div></div>
+  </div>
+</div>
+
+<!-- DAY 4 -->
+<div class="day">
+  <div class="day-head">
+    <div class="day-num"><small>DAY</small><b>4</b></div>
+    <div>
+      <div class="dh-title">甘川洞（감천동） + 松島（송도） + 影島（영도）慢遊日</div>
+      <div class="dh-sub">7/4（六）· 韓服手翻書＋松島（송도）纜車＋ARTE＋太宗台（태종대），多為 48H 免費</div>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="slot"><div class="slot-time">08:30</div><div class="slot-body"><div class="t">前往甘川洞文化村（감천문화마을）</div><div class="d"><span class="meal">早餐</span>後出發。建議早點到搶手翻書。</div><div class="move">► 西面（서면）1 號線 → 土城站（토성역 / Toseong）6 號出口，轉沙下區小巴 1-1 或 2-2 上山，約 30–40 分。</div></div></div>
+    <div class="slot"><div class="slot-time">09:00</div><div class="slot-body"><div class="t">甘川洞（감천동）:手翻書 + 韓服體驗<span class="vbp vbp-48">48H 免費</span></div><div class="d">五彩山城超好拍。<b>Flipbook 手翻書</b>很熱門,一開門就去排(<b>一本需 2 張 pass 兌換</b>,不足每張補 ₩5,000);<b>韓服體驗</b>也是 pass 免費,穿著逛村拍照超有 fu。</div></div></div>
+    <div class="slot"><div class="slot-time">11:45</div><div class="slot-body"><div class="t">松島（송도） · 午餐<span class="meal">午餐</span></div><div class="d">松島（송도）海邊餐廳(海景西式/海鮮)。<div class="move">► 甘川洞（감천동）搭公車或計程車到松島（송도）,約 15 分。</div></div></div></div>
+    <div class="slot"><div class="slot-time">12:45</div><div class="slot-body"><div class="t">松島海上纜車（송도해상케이블카） + 天空步道<span class="vbp vbp-48">48H 免費</span></div><div class="d">韓國知名跨海纜車(可選水晶車廂、補差價),憑 48H pass 免費。配松島天空步道（송도구름산책로）/龍宮雲橋（용궁구름다리）,海景超美。</div></div></div>
+    <div class="slot"><div class="slot-time">14:30</div><div class="slot-body"><div class="t">ARTE MUSEUM（아르떼뮤지엄 / 影島 영도）<span class="vbp vbp-48">48H 免費</span></div><div class="d">全球最大沉浸式媒體藝術館，19 件互動作品（憑 48H pass 免費）。<b>⚠ 先排這個</b>:務必在 48H 視窗關閉前(≈ 7/2 啟用時間 +48 小時)入場,放下午前段最穩。</div><div class="move">► 松島（송도）過影島大橋（영도대교）,計程車約 15–20 分。</div></div></div>
+    <div class="slot"><div class="slot-time">16:30</div><div class="slot-body"><div class="t">太宗台（태종대） · Danubi 列車（다누비열차）<span class="vbp vbp-48">48H 免費</span></div><div class="d">影島（영도）南端海岸絕壁,搭 Danubi 觀光列車繞海景,走走停停超悠閒(憑 48H pass 免費)。無時間壓力,放 ARTE 之後剛好。</div><div class="move">► ARTE → 太宗台（태종대）同在影島（영도）,車程約 15 分。</div></div></div>
+    <div class="slot"><div class="slot-time">18:00</div><div class="slot-body"><div class="t">白淺灘文化村（흰여울문화마을） · 夕陽（可選）</div><div class="d">影島（영도）海崖步道、海景咖啡(Having Moment、Footbath 足浴看海)。體力夠就順遊看夕陽,累了可略過。</div></div></div>
+    <div class="slot"><div class="slot-time">19:00</div><div class="slot-body"><div class="t"><span class="meal">晚餐</span> 影島（영도） / 南浦（남포） → 回西面（서면）</div><div class="d">► 影島（영도）搭計程車或公車回南浦站（남포역）轉 1 號線回西面（서면）。</div></div></div>
+  </div>
+</div>
+
+<!-- DAY 5 -->
+<div class="day">
+  <div class="day-head">
+    <div class="day-num"><small>DAY</small><b>5</b></div>
+    <div>
+      <div class="dh-title">Centum（센텀）購物 + F1963 → 機場</div>
+      <div class="dh-sub">7/5（日）· 深夜班機，白天逛街＋文青園區放鬆</div>
+    </div>
+  </div>
+  <div class="day-body">
+    <div class="slot"><div class="slot-time">09:30</div><div class="slot-body"><div class="t">退房 · 行李寄飯店</div><div class="d"><span class="meal">早餐</span>後退房，把行李寄在 Sota 櫃台，輕裝出門。</div></div></div>
+    <div class="slot"><div class="slot-time">10:30</div><div class="slot-body"><div class="t">新世界百貨 Centum City（신세계 센텀시티，全球最大）</div><div class="d">購物、買伴手禮、最後血拼。</div><div class="move">► 西面站（서면역）搭 2 號線 → Centum City 站（센텀시티역），約 20–25 分。</div></div></div>
+    <div class="slot"><div class="slot-time">13:30</div><div class="slot-body"><div class="t">F1963 文化園區（F1963 문화공간）</div><div class="d">舊鋼鐵廠改造,有 YES24 大書店、Terarosa 咖啡、藝廊、竹林花園,超 chill。逛街逛累了來這放鬆收尾,雨天也舒適。<span class="meal">午/晚餐</span>：園區餐廳或 Centum（센텀）美食街。</div><div class="move">► Centum（센텀）搭計程車約 5–10 分。</div></div></div>
+    <div class="slot"><div class="slot-time">16:30</div><div class="slot-body"><div class="t">回西面（서면）取行李 · 整理</div><div class="d">► Centum City 站（센텀시티역）搭 2 號線回西面（서면），拿行李、稍作整理。</div></div></div>
+    <div class="slot"><div class="slot-time">19:00</div><div class="slot-body"><div class="t">前往金海機場（김해공항）</div><div class="d">► 帶行李建議計程車或機場巴士（西面 서면→機場約 1 小時）。預留充裕時間辦理登機。</div></div></div>
+    <div class="slot"><div class="slot-time">22:00</div><div class="slot-body"><div class="t">PUS → TPE（7C6153）</div><div class="d">23:30 抵達桃園 T1，回到家。旅程圓滿！</div></div></div>
+  </div>
+</div>
+
+<!-- REMINDERS -->
+<div style="page-break-inside:avoid;">
+<div class="section-title">出發前 & 旅途中提醒</div>
+<div class="rem"><div class="ic">1</div><div><b>天空膠囊列車</b>旺季超搶手，請提前 1–4 週上官網訂票，並挑晴天去視野最好。</div></div>
+<div class="rem"><div class="ic">2</div><div><b>釜山通行證（VBP）</b>用 48 小時券：7/2 搭遊艇時啟用，視窗到 7/4 約 18:30，窗內遊艇、Skyline、Club D 汗蒸幕、X the Sky、松島（송도）、ARTE 全免費；海岸列車單買 ₩12,000。</div></div>
+<div class="rem"><div class="ic">3</div><div><b>Club D Oasis</b>記得帶泳衣（現場可租），120cm 以下小孩玩水須穿救生衣；買「全套票（水上樂園＋水療全天）」較划算。</div></div>
+<div class="rem"><div class="ic">4</div><div><b>機張（기장） / 松島（송도） / 影島（영도）地鐵到不了</b>（龍宮寺 용궁사、松島纜車 송도해상케이블카、ARTE、白淺灘 흰여울），一家四口直接計程車最省時省力。</div></div>
+<div class="rem"><div class="ic">5</div><div><b>7 月梅雨季</b>備輕便雨具、防曬、薄外套（室內冷氣強）。遇雨可把 Day 2 / Day 3 戶外行程與 Day 5 室內行程對調。</div></div>
+<div class="rem"><div class="ic">6</div><div><b>地鐵方向要認對</b>釜山不同方向走不同閘門，進站前先確認往「萇山」或「多大浦海水浴場」方向。</div></div>
+<div class="rem"><div class="ic">7</div><div><b>西面（서면）基地優勢</b>1、2 號線交會，晚上回來吃宵夜逛街方便，善用西面（서면）美食街與地下街。</div></div>
+<div class="tagline">
+  本行程依航班與景點地理位置安排，時間為建議參考，可依當天狀況彈性調整 ·
+  <span class="pill">Have a great trip! 玩得開心 ☀</span>
+</div>
+</div>
+
+<!-- FARE PAGE -->
+<div style="page-break-before:always;">
+<div class="section-title">計程車 / Uber 車資估算</div>
+<p style="font-size:8.8pt;color:#475569;line-height:1.6;margin-bottom:6px;">
+車資為「<b>每台車</b>」費用，一家四口共乘剛好、不必乘以人數。基準：起跳 ₩4,800、約每公里加 ₩760，取白天路況普通的中間值；Uber／Kakao T 跳表相同，尖峰可能多 ₩1,000–3,000 派車費。實際以 App 上車前的預估車資為準。
+</p>
+
+<div class="fare-day">Day 1（7/1）</div>
+<table class="fare">
+  <tr><th>路段</th><th>約距離</th><th class="r">約車資</th></tr>
+  <tr><td>金海機場（김해공항） → 西面（서면 / Sota）</td><td>~17 km</td><td class="r">₩20,000–25,000</td></tr>
+  <tr><td>西面（서면） → 南浦洞（남포동）</td><td>~4 km</td><td class="r">₩6,000–7,000</td></tr>
+  <tr><td>南浦洞（남포동） → 西面（서면）</td><td>~4 km</td><td class="r">₩6,000–7,000</td></tr>
+  <tr class="sub"><td colspan="2">小計</td><td class="r">約 ₩35,000（NT$760）</td></tr>
+</table>
+
+<div class="fare-day">Day 2（7/2）</div>
+<table class="fare">
+  <tr><th>路段</th><th>約距離</th><th class="r">約車資</th></tr>
+  <tr><td>西面（서면） → 海雲台藍線公園（해운대 블루라인파크 / 尾浦 미포）</td><td>~18 km</td><td class="r">₩17,000–20,000</td></tr>
+  <tr><td>海雲台（해운대） → The Bay 101（더베이101）</td><td>~3 km</td><td class="r">₩5,000–6,000</td></tr>
+  <tr><td>The Bay → 龍湖灣遊艇碼頭（용호만 유람선터미널）</td><td>~8 km</td><td class="r">₩9,000–11,000</td></tr>
+  <tr><td>廣安里（광안리） → 西面（서면）</td><td>~10 km</td><td class="r">₩11,000–13,000</td></tr>
+  <tr class="sub"><td colspan="2">小計</td><td class="r">約 ₩46,000（NT$1,000）</td></tr>
+</table>
+
+<div class="fare-day">Day 3（7/3）· 機張（기장）段最遠最貴</div>
+<table class="fare">
+  <tr><th>路段</th><th>約距離</th><th class="r">約車資</th></tr>
+  <tr><td>西面（서면） → 海東龍宮寺（해동용궁사 / 機張 기장）</td><td>~28 km</td><td class="r">₩25,000–30,000</td></tr>
+  <tr><td>龍宮寺（용궁사） → Skyline Luge（스카이라인 루지）</td><td>~1.5 km</td><td class="r">₩5,000（或走 12 分）</td></tr>
+  <tr><td>Skyline Luge → 海雲台 LCT（해운대 엘시티）</td><td>~15 km</td><td class="r">₩15,000–18,000</td></tr>
+  <tr><td>LCT（엘시티） → 西面（서면）</td><td>~17 km</td><td class="r">₩17,000–20,000</td></tr>
+  <tr class="sub"><td colspan="2">小計</td><td class="r">約 ₩66,000（NT$1,430）</td></tr>
+</table>
+
+<div class="fare-day">Day 4（7/4）</div>
+<table class="fare">
+  <tr><th>路段</th><th>約距離</th><th class="r">約車資</th></tr>
+  <tr><td>西面（서면） → 甘川洞（감천동）</td><td>~9 km</td><td class="r">₩10,000–12,000</td></tr>
+  <tr><td>甘川洞（감천동） → 松島（송도）</td><td>~5 km</td><td class="r">₩7,000–8,000</td></tr>
+  <tr><td>松島（송도） → 影島白淺灘（영도 흰여울）</td><td>~6 km</td><td class="r">₩8,000–9,000</td></tr>
+  <tr><td>白淺灘（흰여울） → ARTE（同影島 영도）</td><td>~3 km</td><td class="r">₩5,000–6,000</td></tr>
+  <tr><td>ARTE → 西面（서면）</td><td>~10 km</td><td class="r">₩11,000–13,000</td></tr>
+  <tr class="sub"><td colspan="2">小計</td><td class="r">約 ₩45,000（NT$980）</td></tr>
+</table>
+
+<div class="fare-day">Day 5（7/5）</div>
+<table class="fare">
+  <tr><th>路段</th><th>約距離</th><th class="r">約車資</th></tr>
+  <tr><td>西面（서면） → Centum（센텀）／新世界（신세계）</td><td>~12 km</td><td class="r">₩12,000–15,000</td></tr>
+  <tr><td>Centum（센텀） → F1963</td><td>~3 km</td><td class="r">₩5,000–6,000</td></tr>
+  <tr><td>F1963 → 西面（서면，取行李）</td><td>~13 km</td><td class="r">₩13,000–16,000</td></tr>
+  <tr><td>西面（서면） → 金海機場（김해공항）</td><td>~17 km</td><td class="r">₩20,000–25,000</td></tr>
+  <tr class="sub"><td colspan="2">小計</td><td class="r">約 ₩55,000（NT$1,200）</td></tr>
+</table>
+
+<div class="fare-total">全程合計（全部計程車／Uber，一家四口共乘）：約 ₩247,000 ≈ NT$5,370</div>
+
+<div class="fare-note">
+  • <b>最貴兩段</b>是 Day 3「西面（서면）↔機張龍宮寺（기장 용궁사）」與機場接送。想省:機場改機場巴士、長程（西面 서면↔海雲台 해운대/Centum 센텀）改 2 號線地鐵（約 ₩1,800/人，4 人約 ₩7,200），可省一半以上。<br>
+  • <b>夜間加成</b>:22:00 後才加成。你 Day 2 約 21:30、Day 3 約 21:00 回西面（서면），都在加成前。<br>
+  • <b>Uber vs Kakao T</b>:跳表相同。Uber 介面繁中、可綁台灣卡;Kakao T 車最多。兩者上車前都會顯示預估車資。<br>
+  • 以上為白天、路況普通估值;塞車或繞路每段多抓 10–20% buffer 較保險。
+</div>
+</div>
+
+<!-- TRANSIT ALTERNATIVE PAGE -->
+<div style="page-break-before:always;">
+<div class="section-title">省錢替代:巴士 + 地鐵路線與車資</div>
+<p style="font-size:8.8pt;color:#475569;line-height:1.6;margin-bottom:8px;">
+以下挑「計程車最貴、改大眾運輸最省」的長程路段對照。地鐵每段約 <b>₩1,800/人</b>（二區間，刷 T-money），<b>一家四口約 ₩7,200</b>；與計程車相比常省一半以上。短程（如同區內 3–6 km）計程車反而方便又不貴，建議仍搭車。
+</p>
+
+<div class="fare-day">① 機場 ↔ 西面（서면，Day 1 抵達 / Day 5 離開）</div>
+<table class="fare">
+  <tr><th>方式</th><th>路線</th><th class="r">車資（4 人）</th></tr>
+  <tr><td>計程車</td><td>直達，約 30–40 分</td><td class="r">₩20,000–25,000</td></tr>
+  <tr><td><b>機場巴士</b></td><td>金海機場（김해공항） → 西面（서면，利木津/座席巴士），約 45–60 分</td><td class="r">約 ₩7,000×4 ≈ ₩28,000</td></tr>
+  <tr><td><b>輕軌+地鐵</b></td><td>機場 → 釜山-金海輕軌（부산김해경전철） → 沙上站（사상역）轉 2 號線 → 西面（서면），約 50–60 分</td><td class="r">約 ₩1,800×4 ≈ ₩7,200</td></tr>
+  <tr class="sub"><td colspan="2">最省</td><td class="r">輕軌+地鐵 ₩7,200（帶行李較費力）</td></tr>
+</table>
+<p style="font-size:8.2pt;color:#64748b;margin:-2px 0 6px;">＊清晨抵達、帶行李＋小孩，計程車仍最輕鬆;想省錢且不趕時間再選輕軌+地鐵。</p>
+
+<div class="fare-day">② 西面（서면） ↔ 海雲台（해운대，Day 2 去 / Day 3 回）</div>
+<table class="fare">
+  <tr><th>方式</th><th>路線</th><th class="r">車資（4 人）</th></tr>
+  <tr><td>計程車</td><td>約 18 km、30–40 分</td><td class="r">₩17,000–20,000</td></tr>
+  <tr><td><b>地鐵</b></td><td>西面站（서면역）搭 <b>2 號線</b>（往萇山 장산方向）直達海雲台站（해운대역），約 35–40 分、不用換車</td><td class="r">約 ₩1,800×4 ≈ ₩7,200</td></tr>
+  <tr class="sub"><td colspan="2">最省</td><td class="r">地鐵 ₩7,200（直達、省 ~₩12,000）</td></tr>
+</table>
+
+<div class="fare-day">③ 西面（서면） ↔ 龍宮寺（용궁사 / 機張 기장，Day 3）· 計程車最貴段</div>
+<table class="fare">
+  <tr><th>方式</th><th>路線</th><th class="r">車資（4 人）</th></tr>
+  <tr><td>計程車</td><td>約 28 km、50–60 分（直達）</td><td class="r">₩25,000–30,000</td></tr>
+  <tr><td><b>地鐵+公車</b></td><td>2 號線到海雲台站（해운대역） → 轉 <b>1001/100/181 號公車</b> 到龍宮寺/國立水產科學院站（용궁사·국립수산과학원），約 70–90 分</td><td class="r">約 ₩2,500×4 ≈ ₩10,000</td></tr>
+  <tr class="sub"><td colspan="2">最省</td><td class="r">地鐵+公車 ~₩10,000（但較費時、需轉乘）</td></tr>
+</table>
+<p style="font-size:8.2pt;color:#64748b;margin:-2px 0 6px;">＊龍宮寺（용궁사）、Skyline Luge 在同一站（용궁사·국립수산과학원）下車，公車可一次到位;趕時間或怕帶長輩轉乘，這段用計程車仍最省事。</p>
+
+<div class="fare-day">④ 西面（서면） ↔ Centum（센텀）／新世界（신세계，Day 5）</div>
+<table class="fare">
+  <tr><th>方式</th><th>路線</th><th class="r">車資（4 人）</th></tr>
+  <tr><td>計程車</td><td>約 12 km、20–30 分</td><td class="r">₩12,000–15,000</td></tr>
+  <tr><td><b>地鐵</b></td><td>西面站（서면역）搭 <b>2 號線</b>（往萇山 장산方向）→ Centum City 站（센텀시티역），約 20–25 分、不用換車</td><td class="r">約 ₩1,800×4 ≈ ₩7,200</td></tr>
+  <tr class="sub"><td colspan="2">最省</td><td class="r">地鐵 ₩7,200（直達、又快又省）</td></tr>
+</table>
+
+<div class="fare-total">四段長程全改大眾運輸：約 ₩31,600（含機場輕軌）vs 全計程車約 ₩94,000–110,000 → 省約 NT$1,400–1,700</div>
+
+<div class="fare-note">
+  • <b>建議混搭最聰明</b>:長程直達段（②西面 서면↔海雲台 해운대、④西面 서면↔Centum 센텀）走 2 號線又快又省;短程同區內（海雲台 해운대→The Bay、影島 영도內、甘川 감천↔松島 송도）仍搭計程車方便。<br>
+  • <b>③龍宮寺（용궁사）</b>:省約 ₩15,000 但多花 30–40 分還要轉公車;若全家含長輩、又是一早趕場，計程車的時間與舒適值得。<br>
+  • <b>①機場</b>:清晨帶行李＋睏的小孩，計程車最輕鬆;Day 5 離開時間充裕可考慮機場巴士/輕軌。<br>
+  • 公車/輕軌一律刷 <b>T-money/Cashbee</b>，轉乘 30 分內有優惠;地鐵記得認對「往萇山（장산）」方向月台。
+</div>
+</div>
+
+<!-- RAIN PLAN B PAGE -->
+<div style="page-break-before:always;">
+<div class="section-title">雨天 Plan B 對照表</div>
+<p style="font-size:8.8pt;color:#475569;line-height:1.6;margin-bottom:8px;">
+七月初為梅雨季，降雨機率高。出發前 2–3 天再確認預報；當天下雨就照下表把戶外景點換成室內替代。<b>48H 窗內(7/2 晚～7/4)被換掉的免費景點，挪到窗內其他時段補刷即可，pass 不浪費。</b>
+</p>
+
+<table class="fare">
+  <tr><th>原行程（晴）</th><th>雨天替代</th></tr>
+  <tr><td colspan="2" style="background:#f0fdfa;font-weight:800;color:#0f766e;">Day 1（7/1）</td></tr>
+  <tr><td>龍頭山公園（용두산공원） · 釜山塔（부산타워）夜景（戶外/可選）</td><td>南浦地下街（남포지하상가）、樂天百貨光復店（롯데백화점 광복점）室內逛街；釜山塔本身室內觀景仍可上(視雨勢)</td></tr>
+
+  <tr><td colspan="2" style="background:#f0fdfa;font-weight:800;color:#0f766e;">Day 2（7/2）· 最怕雨</td></tr>
+  <tr><td>海雲台（해운대）玩水 / The Bay 101（더베이101）</td><td>改室內：SEA LIFE 水族館（씨라이프 부산아쿠아리움，海雲台 해운대海邊）、海雲台（해운대）周邊咖啡;或提前去 X the Sky 室內觀景</td></tr>
+  <tr><td><b>鑽石灣遊艇（다이아몬드베이，風浪/雷雨恐停航）</b></td><td>先確認船班；若停航 → 啟用點改用別的窗內景點(如先泡 Club D 汗蒸幕)，遊艇延到 7/3 或 7/4 傍晚補(窗內仍免費)</td></tr>
+
+  <tr><td colspan="2" style="background:#f0fdfa;font-weight:800;color:#0f766e;">Day 3（7/3）</td></tr>
+  <tr><td>海東龍宮寺（해동용궁사，戶外）</td><td>仍可去(撐傘)，或縮短停留；雨大就直接拉到 LCT（엘시티）室內</td></tr>
+  <tr><td><b>Skyline Luge（스카이라인 루지，雨天停駛）</b></td><td>取消 → 時間給 Club D <b>室內</b>水樂園+汗蒸幕玩好玩滿，或多留 X the Sky</td></tr>
+  <tr><td>Club D（클럽디오아시스）水樂園 / X the Sky（부산 엑스 더 스카이）</td><td>本就室內，照玩；可延長停留把雨天耗掉</td></tr>
+
+  <tr><td colspan="2" style="background:#f0fdfa;font-weight:800;color:#0f766e;">Day 4（7/4）</td></tr>
+  <tr><td>甘川洞（감천동）韓服/手翻書（半戶外）</td><td>手翻書室內可玩；韓服改室內拍、或縮短逛村時間</td></tr>
+  <tr><td><b>松島海上纜車（송도해상케이블카，強風恐停）</b></td><td>確認營運；停駛 → 直接過影島（영도），把時間給 ARTE(室內)、國立海洋博物館（국립해양박물관，室內免費）</td></tr>
+  <tr><td>太宗台（태종대） / 白淺灘（흰여울，戶外海景）</td><td>改室內：ARTE MUSEUM(室內)、影島國立海洋博物館（영도 국립해양박물관）；或與 Day 5 室內行程對調</td></tr>
+  <tr><td>ARTE MUSEUM</td><td>本就室內，雨天首選，照原時段(仍須窗關前入場)</td></tr>
+
+  <tr><td colspan="2" style="background:#f0fdfa;font-weight:800;color:#0f766e;">Day 5（7/5）</td></tr>
+  <tr><td>新世界 Centum（신세계 센텀시티） / F1963</td><td>本就室內/半室內，雨天最安心，無需更動</td></tr>
+</table>
+
+<div class="fare-note">
+  • <b>全天大雨的萬用室內備案</b>：新世界 Centum City（신세계 센텀시티，全球最大百貨，逛街+美食街+室內溜冰場）、Spa Land（스파랜드）、Lotte 百貨、ARTE/MUSEUM 1、海洋博物館（국립해양박물관）——任一個都能耗掉半天到一天。<br>
+  • <b>遊艇是最大變數</b>：出發前先用官方 IG/LINE 跟船家確認當天是否出航，避免白跑龍湖灣（용호만）。<br>
+  • <b>48H 不限量的好處</b>：雨天把戶外免費景點往窗內其他時段挪，pass 價值不浪費。<br>
+  • <b>必帶</b>：折傘/輕便雨衣、防滑鞋、薄外套(室內冷氣強)、手機防水袋。韓國便利商店也買得到雨具。
+</div>
+</div>
+
+<!-- ZONE MAP PAGE -->
+<div style="page-break-before:always;">
+<div class="section-title">區域動線示意圖</div>
+<p style="font-size:8.8pt;color:#475569;line-height:1.6;margin-bottom:6px;">
+以西面（서면）為基地，每天往一個區域出發、晚上回來休息。此為示意圖（非實際比例地圖），幫你一眼看懂方位與動線。
+</p>
+<svg viewBox="0 0 720 560" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:'Noto Sans CJK TC','Noto Sans TC',sans-serif;">
+  <!-- connectors -->
+  <g stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 5" fill="none">
+    <line x1="360" y1="267" x2="150" y2="437"/>
+    <line x1="360" y1="267" x2="150" y2="162"/>
+    <line x1="360" y1="267" x2="575" y2="82"/>
+    <line x1="360" y1="267" x2="585" y2="252"/>
+    <line x1="360" y1="267" x2="575" y2="442"/>
+  </g>
+  <!-- connector labels -->
+  <g font-size="8.5" fill="#64748b" text-anchor="middle">
+    <text x="250" y="350">1號線・約10分</text>
+    <text x="250" y="210">計程車/1號線</text>
+    <text x="468" y="158">計程車・50–60分</text>
+    <text x="476" y="252">2號線・約35分</text>
+    <text x="466" y="350">2號線・約20分</text>
+  </g>
+
+  <!-- 西面 center -->
+  <g transform="translate(285,236)">
+    <rect width="150" height="62" rx="12" fill="#0f766e"/>
+    <text x="75" y="27" font-size="13" font-weight="800" fill="#fff" text-anchor="middle">西面 서면（基地）</text>
+    <text x="75" y="46" font-size="9" fill="#d1fae5" text-anchor="middle">住宿・每晚回來</text>
+  </g>
+
+  <!-- DAY 1 -->
+  <g transform="translate(30,395) rotate(-2)">
+    <rect width="220" height="84" rx="12" fill="#fff" stroke="#0e7490" stroke-width="2"/>
+    <text x="14" y="24" font-size="11" font-weight="800" fill="#0e7490">DAY 1 · 南浦 남포圈（西/南）</text>
+    <text x="14" y="46" font-size="9.5" fill="#334155">南浦洞 남포동・光復路 광복로・BIFF</text>
+    <text x="14" y="64" font-size="9.5" fill="#334155">國際市場 국제시장・釜山塔 부산타워</text>
+  </g>
+
+  <!-- DAY 4 -->
+  <g transform="translate(30,120) rotate(1.5)">
+    <rect width="220" height="84" rx="12" fill="#fff" stroke="#b45309" stroke-width="2"/>
+    <text x="14" y="24" font-size="11" font-weight="800" fill="#b45309">DAY 4 · 影島 영도圈（西/南）</text>
+    <text x="14" y="46" font-size="9.5" fill="#334155">甘川洞 감천동・松島纜車 송도</text>
+    <text x="14" y="64" font-size="9.5" fill="#334155">ARTE <tspan fill="#dc2626" font-weight="800">限時</tspan>・太宗台 태종대・白淺灘 흰여울</text>
+  </g>
+
+  <!-- DAY 3 -->
+  <g transform="translate(465,40) rotate(-1.5)">
+    <rect width="230" height="84" rx="12" fill="#fff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="14" y="24" font-size="11" font-weight="800" fill="#7c3aed">DAY 3 · 機張 기장+LCT（東北）</text>
+    <text x="14" y="46" font-size="9.5" fill="#334155">龍宮寺 용궁사・Skyline Luge</text>
+    <text x="14" y="64" font-size="9.5" fill="#334155">Club D・X the Sky（48H主力）</text>
+  </g>
+
+  <!-- DAY 2 -->
+  <g transform="translate(475,210) rotate(2)">
+    <rect width="230" height="84" rx="12" fill="#fff" stroke="#0f766e" stroke-width="2"/>
+    <text x="14" y="24" font-size="11" font-weight="800" fill="#0f766e">DAY 2 · 海雲台 해운대/廣安里 광안리</text>
+    <text x="14" y="46" font-size="9.5" fill="#334155">海岸列車・The Bay 101 더베이</text>
+    <text x="14" y="64" font-size="9.5" fill="#334155">龍湖灣 용호만遊艇 <tspan fill="#0e7490" font-weight="800">★啟用48H</tspan></text>
+  </g>
+
+  <!-- DAY 5 -->
+  <g transform="translate(465,400) rotate(-1)">
+    <rect width="230" height="84" rx="12" fill="#fff" stroke="#be185d" stroke-width="2"/>
+    <text x="14" y="24" font-size="11" font-weight="800" fill="#be185d">DAY 5 · Centum 센텀（東）</text>
+    <text x="14" y="46" font-size="9.5" fill="#334155">新世界 신세계・F1963</text>
+    <text x="14" y="64" font-size="9.5" fill="#334155">→ 前往金海機場 김해공항</text>
+  </g>
+
+  <!-- legend -->
+  <g transform="translate(30,510)">
+    <text x="0" y="0" font-size="9" fill="#0e7490" font-weight="800">★ 啟用 48H</text>
+    <text x="95" y="0" font-size="9" fill="#64748b">= 7/2 傍晚搭遊艇時啟用</text>
+    <text x="290" y="0" font-size="9" fill="#dc2626" font-weight="800">限時</text>
+    <text x="320" y="0" font-size="9" fill="#64748b">= ARTE 須在 7/2 啟用 +48 小時前入場</text>
+    <text x="0" y="20" font-size="9" fill="#64748b">- - - 虛線 = 從西面 서면基地往返各區（含交通方式與時間）</text>
+  </g>
+</svg>
+<p style="font-size:8.4pt;color:#475569;line-height:1.6;margin-top:6px;">
+動線重點：<b>東邊一大串</b>（海雲台 해운대・廣安里 광안리・機張 기장・Centum 센텀）＝ Day 2、3、5，48H 高價景點最密；<b>西/南邊</b>（南浦 남포・甘川洞 감천동・松島 송도・影島 영도）＝ Day 1、4。跨區拉車主要發生在「回西面 서면睡覺」這段，白天同區內移動都不遠。
+</p>
+</div>
+
+<script>
+(() => {
+  const places = [
+    { zh: '金海國際機場', ko: '김해국제공항', query: '김해국제공항' },
+    { zh: '金海機場', ko: '김해공항', query: '김해공항' },
+    { zh: '金海輕軌', ko: '김해경전철', query: '부산김해경전철' },
+    { zh: '金海', ko: '김해', query: '김해' },
+    { zh: '西面站', ko: '서면역', query: '부산 서면역' },
+    { zh: '西面', ko: '서면', query: '부산 서면' },
+    { zh: '南浦地下街', ko: '남포지하상가', query: '부산 남포지하상가' },
+    { zh: '南浦洞', ko: '남포동', query: '부산 남포동' },
+    { zh: '南浦站', ko: '남포역', query: '부산 남포역' },
+    { zh: '南浦', ko: '남포', query: '부산 남포' },
+    { zh: '光復路', ko: '광복로', query: '부산 광복로' },
+    { zh: 'BIFF 廣場', ko: 'BIFF 광장', query: '부산 BIFF 광장' },
+    { zh: '國際市場', ko: '국제시장', query: '부산 국제시장' },
+    { zh: '富平罐頭夜市', ko: '부평깡통시장', query: '부산 부평깡통시장' },
+    { zh: '樂天百貨光復店', ko: '롯데백화점 광복점', query: '부산 롯데백화점 광복점' },
+    { zh: '龍頭山公園', ko: '용두산공원', query: '부산 용두산공원' },
+    { zh: '釜山塔', ko: '부산타워', query: '부산타워' },
+    { zh: '海雲台藍線公園', ko: '해운대 블루라인파크', query: '해운대 블루라인파크' },
+    { zh: '海雲台海水浴場', ko: '해운대해수욕장', query: '해운대해수욕장' },
+    { zh: '海雲台市場', ko: '해운대시장', query: '부산 해운대시장' },
+    { zh: '海雲台站', ko: '해운대역', query: '부산 해운대역' },
+    { zh: '海雲台', ko: '해운대', query: '부산 해운대' },
+    { zh: '尾浦', ko: '미포', query: '부산 미포' },
+    { zh: '青沙浦', ko: '청사포', query: '부산 청사포' },
+    { zh: '廣安大橋', ko: '광안대교', query: '광안대교' },
+    { zh: '廣安站', ko: '광안역', query: '부산 광안역' },
+    { zh: '廣安里', ko: '광안리', query: '부산 광안리' },
+    { zh: '龍湖灣遊艇碼頭', ko: '용호만 유람선터미널', query: '부산 용호만 유람선터미널' },
+    { zh: '龍湖灣', ko: '용호만', query: '부산 용호만' },
+    { zh: '鑽石灣遊艇', ko: '다이아몬드베이', query: '부산 다이아몬드베이' },
+    { zh: '海東龍宮寺', ko: '해동용궁사', query: '해동용궁사' },
+    { zh: '龍宮寺', ko: '용궁사', query: '부산 용궁사' },
+    { zh: '機張', ko: '기장', query: '부산 기장' },
+    { zh: '萇山', ko: '장산', query: '부산 장산역' },
+    { zh: 'Skyline Luge', ko: '스카이라인 루지', query: '부산 스카이라인 루지' },
+    { zh: 'LCT', ko: '엘시티', query: '부산 엘시티' },
+    { zh: 'Club D Oasis', ko: '클럽디오아시스', query: '부산 클럽디오아시스' },
+    { zh: 'Busan X the Sky', ko: '부산 엑스 더 스카이', query: '부산 엑스 더 스카이' },
+    { zh: '甘川洞文化村', ko: '감천문화마을', query: '감천문화마을' },
+    { zh: '甘川洞', ko: '감천동', query: '부산 감천동' },
+    { zh: '土城站', ko: '토성역', query: '부산 토성역' },
+    { zh: '松島海上纜車', ko: '송도해상케이블카', query: '송도해상케이블카' },
+    { zh: '松島天空步道', ko: '송도구름산책로', query: '송도구름산책로' },
+    { zh: '龍宮雲橋', ko: '용궁구름다리', query: '부산 용궁구름다리' },
+    { zh: '松島', ko: '송도', query: '부산 송도' },
+    { zh: '影島大橋', ko: '영도대교', query: '영도대교' },
+    { zh: '影島', ko: '영도', query: '부산 영도' },
+    { zh: '太宗台', ko: '태종대', query: '태종대' },
+    { zh: 'Danubi 列車', ko: '다누비열차', query: '태종대 다누비열차' },
+    { zh: '白淺灘文化村', ko: '흰여울문화마을', query: '흰여울문화마을' },
+    { zh: '白淺灘', ko: '흰여울', query: '부산 흰여울문화마을' },
+    { zh: '新世界百貨 Centum City', ko: '신세계 센텀시티', query: '신세계 센텀시티' },
+    { zh: 'Centum City 站', ko: '센텀시티역', query: '부산 센텀시티역' },
+    { zh: 'Centum City', ko: '센텀시티', query: '부산 센텀시티' },
+    { zh: '新世界', ko: '신세계', query: '부산 신세계 센텀시티' },
+    { zh: 'Centum', ko: '센텀', query: '부산 센텀' },
+    { zh: 'F1963 文化園區', ko: 'F1963 문화공간', query: '부산 F1963' },
+    { zh: '沙上站', ko: '사상역', query: '부산 사상역' },
+    { zh: '東海線', ko: '동해선', query: '부산 동해선' },
+    { zh: 'SEA LIFE 水族館', ko: '씨라이프 부산아쿠아리움', query: '씨라이프 부산아쿠아리움' },
+    { zh: '國立海洋博物館', ko: '국립해양박물관', query: '부산 국립해양박물관' },
+    { zh: 'Spa Land', ko: '스파랜드', query: '부산 스파랜드' }
+  ];
+
+  const tokenMap = new Map();
+  for (const place of places) {
+    if (!tokenMap.has(place.zh)) tokenMap.set(place.zh, { type: 'map', place });
+    if (!tokenMap.has(place.ko)) tokenMap.set(place.ko, { type: 'copy', place });
+  }
+
+  const tokens = [...tokenMap.keys()].sort((a, b) => b.length - a.length);
+  const pattern = new RegExp(tokens.map(escapeRegExp).join('|'), 'g');
+  const skipTags = new Set(['A', 'SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'SELECT', 'BUTTON']);
+
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement;
+      if (!parent || skipTags.has(parent.tagName) || parent.closest('svg, .place-map, .ko-copy')) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      pattern.lastIndex = 0;
+      return pattern.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(wrapTextNode);
+  wrapSvgTextLabels();
+
+  document.addEventListener('click', event => {
+    const mapTarget = event.target.closest('.place-map-svg');
+    if (mapTarget) {
+      window.open(mapTarget.dataset.href, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    const copyTarget = event.target.closest('.ko-copy, .ko-copy-svg');
+    if (!copyTarget) return;
+    copyText(copyTarget.dataset.copy);
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+
+    const mapTarget = event.target.closest('.place-map-svg');
+    if (mapTarget) {
+      event.preventDefault();
+      window.open(mapTarget.dataset.href, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    const copyTarget = event.target.closest('.ko-copy, .ko-copy-svg');
+    if (!copyTarget) return;
+    event.preventDefault();
+    copyText(copyTarget.dataset.copy);
+  });
+
+  function wrapTextNode(node) {
+    pattern.lastIndex = 0;
+    const fragment = document.createDocumentFragment();
+    let lastIndex = 0;
+
+    node.nodeValue.replace(pattern, (match, offset) => {
+      if (offset > lastIndex) fragment.append(node.nodeValue.slice(lastIndex, offset));
+      fragment.append(createInteractiveNode(match));
+      lastIndex = offset + match.length;
+      return match;
+    });
+
+    if (lastIndex < node.nodeValue.length) fragment.append(node.nodeValue.slice(lastIndex));
+    node.replaceWith(fragment);
+  }
+
+  function wrapSvgTextLabels() {
+    document.querySelectorAll('svg text').forEach(textElement => {
+      if (textElement.querySelector('tspan')) return;
+      pattern.lastIndex = 0;
+      if (!pattern.test(textElement.textContent)) return;
+
+      pattern.lastIndex = 0;
+      const originalText = textElement.textContent;
+      let lastIndex = 0;
+      textElement.textContent = '';
+
+      originalText.replace(pattern, (match, offset) => {
+        if (offset > lastIndex) {
+          appendSvgTspan(textElement, originalText.slice(lastIndex, offset), null);
+        }
+        appendSvgTspan(textElement, match, tokenMap.get(match));
+        lastIndex = offset + match.length;
+        return match;
+      });
+
+      if (lastIndex < originalText.length) {
+        appendSvgTspan(textElement, originalText.slice(lastIndex), null);
+      }
+    });
+  }
+
+  function appendSvgTspan(textElement, text, token) {
+    const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+    tspan.textContent = text;
+
+    if (token?.type === 'map') {
+      tspan.classList.add('place-map-svg');
+      tspan.dataset.href = `https://map.naver.com/p/search/${encodeURIComponent(token.place.query)}`;
+      tspan.setAttribute('role', 'link');
+      tspan.setAttribute('tabindex', '0');
+    } else if (token?.type === 'copy') {
+      tspan.classList.add('ko-copy-svg');
+      tspan.dataset.copy = text;
+      tspan.setAttribute('role', 'button');
+      tspan.setAttribute('tabindex', '0');
+    }
+
+    textElement.append(tspan);
+  }
+
+  function createInteractiveNode(text) {
+    const token = tokenMap.get(text);
+    if (token.type === 'map') {
+      const link = document.createElement('a');
+      link.className = 'place-map';
+      link.href = `https://map.naver.com/p/search/${encodeURIComponent(token.place.query)}`;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.title = `在 Naver Map 開啟 ${token.place.ko}`;
+      link.textContent = text;
+      return link;
+    }
+
+    const span = document.createElement('span');
+    span.className = 'ko-copy';
+    span.role = 'button';
+    span.tabIndex = 0;
+    span.dataset.copy = text;
+    span.title = `複製 ${text}`;
+    span.textContent = text;
+    return span;
+  }
+
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        fallbackCopy(text);
+      }
+      showToast(`已複製：${text}`);
+    } catch (error) {
+      fallbackCopy(text);
+      showToast(`已複製：${text}`);
+    }
+  }
+
+  function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.append(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    textarea.remove();
+  }
+
+  function showToast(message) {
+    let toast = document.querySelector('.copy-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.className = 'copy-toast';
+      document.body.append(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => toast.classList.remove('show'), 1500);
+  }
+
+  function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+})();
+</script>
+
+</body>
+</html>
