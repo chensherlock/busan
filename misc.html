@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>其它資訊｜圖片整理</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+    color: #0f172a;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.20), transparent 40%),
+      radial-gradient(circle at 85% 5%, rgba(16, 185, 129, 0.20), transparent 38%),
+      linear-gradient(165deg, #f8fafc 0%, #eff6ff 55%, #ecfeff 100%);
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.10);
+    backdrop-filter: blur(2px);
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .back {
+    display: inline-block;
+    color: #0e7490;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .back:hover { text-decoration: underline; }
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #065f46;
+  }
+  .sub {
+    margin: 6px 0 16px;
+    color: #475569;
+    font-size: 14px;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  }
+  .media {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    background: #e2e8f0;
+    display: block;
+  }
+  .meta {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.5;
+    border-top: 1px solid #f1f5f9;
+  }
+  .meta strong { color: #0f766e; }
+  @media (max-width: 640px) {
+    .media { height: 180px; }
+    h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="index.html">← 回行程頁</a>
+      <h1>其它資訊｜misc 圖片整理</h1>
+    </div>
+    <p class="sub">集中放置旅程相關雜項圖片，方便快速預覽與對照。</p>
+
+    <section class="gallery">
+      <article class="card">
+        <img class="media" src="P4.png" alt="P4 圖片">
+        <div class="meta"><strong>檔名：</strong>P4.png</div>
+      </article>
+
+      <article class="card">
+        <img class="media" src="train.jpg" alt="train jpg 圖片">
+        <div class="meta"><strong>檔名：</strong>train.jpg</div>
+      </article>
+
+      <article class="card">
+        <img class="media" src="train.webp" alt="train webp 圖片">
+        <div class="meta"><strong>檔名：</strong>train.webp</div>
+      </article>
+
+      <article class="card">
+        <img class="media" src="unnamed.webp" alt="unnamed webp 圖片">
+        <div class="meta"><strong>檔名：</strong>unnamed.webp</div>
+      </article>
+    </section>
+  </div>
+</body>
+</html>
