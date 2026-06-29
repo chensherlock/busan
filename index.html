@@ -132,6 +132,16 @@
     background: rgba(15, 23, 42, .16);
   }
   .quick-link:hover { background: rgba(15, 23, 42, .26); }
+  /* ---------- Korean text with buttons ---------- */
+  .korean-text-wrapper { display: flex; align-items: center; gap: 6px; }
+  .korean-text-wrapper span { font-weight: 500; }
+  .korean-btn { 
+    background: none; border: 1px solid #cbd5e1; border-radius: 4px; 
+    padding: 2px 6px; font-size: 7.2pt; cursor: pointer; color: #0e7490; font-weight: 600;
+    transition: all 0.2s;
+  }
+  .korean-btn:hover { background: #f0fdfa; border-color: #0e7490; }
+  .korean-btn:active { transform: scale(0.95); }
 </style>
 </head>
 <body>
@@ -624,6 +634,68 @@
   • Skyline Luge、松島纜車、Danubi 列車等戶外設施<b>遇雨/強風可能停駛</b>，當天先確認。
 </div>
 </div>
+
+<script>
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('已复制：' + text);
+    }).catch(err => {
+      console.error('复制失败:', err);
+    });
+  }
+
+  function speak(text) {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      speechSynthesis.speak(utterance);
+    } else {
+      alert('您的浏览器不支持语音合成功能');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // 找到景点资讯速查表（包含"景點"、"韓文"、"地址"、"營業時間"等表头的表格）
+    const tables = document.querySelectorAll('table.fare');
+    if (tables.length === 0) return;
+    
+    // 遍历所有表格，找到景点信息表（最后一个有 5 列的表格）
+    for (let table of tables) {
+      const headerRow = table.querySelector('tr th:nth-child(2)');
+      if (headerRow && headerRow.textContent.includes('韓文')) {
+        // 找到了景点资讯表
+        const rows = table.querySelectorAll('tr');
+        
+        rows.forEach((row) => {
+          const cells = row.querySelectorAll('td');
+          if (cells.length < 5) return; // 景点表有5列
+          
+          const koreanCell = cells[1]; // 第二列是韓文
+          const koreanText = koreanCell.textContent.trim();
+          
+          // 如果是有效的韓文内容（不是分组行）
+          if (koreanText && !koreanCell.hasAttribute('colspan') && koreanText.length > 0) {
+            // 检查是否已经处理过
+            if (!koreanCell.querySelector('.korean-text-wrapper')) {
+              koreanCell.innerHTML = `
+                <div class="korean-text-wrapper">
+                  <span>${koreanText}</span>
+                  <button class="korean-btn" onclick="copyToClipboard('${koreanText.replace(/'/g, "\\'")}')" title="复制韓文">📋</button>
+                  <button class="korean-btn" onclick="speak('${koreanText.replace(/'/g, "\\'")}')" title="发音">🔊</button>
+                </div>
+              `;
+            }
+          }
+        });
+        
+        break; // 找到景点表后就停止
+      }
+    }
+  });
+</script>
 
 </body>
 </html>
