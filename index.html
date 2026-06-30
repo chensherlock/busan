@@ -142,9 +142,52 @@
   }
   .korean-btn:hover { background: #f0fdfa; border-color: #0e7490; }
   .korean-btn:active { transform: scale(0.95); }
+  /* ---------- Korean toggle control ---------- */
+  .controls {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 8px;
+    background: #ecfeff; border: 1px solid #a5f3fc; border-radius: 8px;
+    padding: 8px 12px; margin-bottom: 14px;
+    font-size: 9.4pt; font-weight: 600; color: #0e7490; cursor: pointer;
+  }
+  .controls input { width: 16px; height: 16px; accent-color: #0e7490; cursor: pointer; }
+  /* ---------- Inline Korean annotation ---------- */
+  .ko-annot {
+    display: inline-flex; align-items: center; gap: 3px;
+    color: #7c3aed; font-weight: 600; font-size: 8.6pt;
+    white-space: nowrap; vertical-align: baseline; margin: 0 2px;
+  }
+  /* ---------- Korean zoom overlay ---------- */
+  .ko-zoom-overlay {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(15, 23, 42, .92);
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 26px; padding: 24px; cursor: pointer;
+  }
+  .ko-zoom-overlay.show { display: flex; }
+  .ko-zoom-overlay .ko-zoom-text {
+    color: #fff; font-weight: 800; line-height: 1.15; text-align: center;
+    font-size: clamp(48px, 16vw, 200px); word-break: keep-all;
+  }
+  .ko-zoom-overlay .ko-zoom-hint { color: #cbd5e1; font-size: 14px; }
+  @media print {
+    .controls { display: none !important; }
+    .ko-annot .korean-btn { display: none; }
+    .ko-zoom-overlay { display: none !important; }
+  }
 </style>
 </head>
 <body>
+
+<label class="controls">
+  <input type="checkbox" id="toggleKorean">
+  在行程中的中文地名後標註韓文（附 複製 / 發音 / 放大 按鈕）
+</label>
+
+<div class="ko-zoom-overlay" id="koZoomOverlay">
+  <div class="ko-zoom-text" id="koZoomText"></div>
+  <div class="ko-zoom-hint">點一下任意處關閉</div>
+</div>
 
 <div class="cover">
   <div class="eyebrow">BUSAN FAMILY TRIP · 釜山自由行</div>
@@ -637,9 +680,7 @@
 
 <script>
   function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-      alert('已复制：' + text);
-    }).catch(err => {
+    navigator.clipboard.writeText(text).catch(err => {
       console.error('复制失败:', err);
     });
   }
@@ -657,7 +698,152 @@
     }
   }
 
+  // 全螢幕放大韓文地名，方便出示給別人看
+  function showLargeKorean(text) {
+    const overlay = document.getElementById('koZoomOverlay');
+    const target = document.getElementById('koZoomText');
+    if (!overlay || !target) return;
+    target.textContent = text;
+    overlay.classList.add('show');
+  }
+
+  // ---- 行程中文地名 → 韓文對照（長詞優先比對）----
+  const placeKorean = {
+    '金海國際機場': '김해국제공항',
+    '金海機場': '김해국제공항',
+    '海雲台海水浴場': '해운대해수욕장',
+    '海雲台市場': '해운대시장',
+    '海雲台 LCT': '엘시티',
+    '海雲台': '해운대',
+    '海東龍宮寺': '해동용궁사',
+    '龍宮寺': '해동용궁사',
+    '甘川洞文化村': '감천문화마을',
+    '甘川洞': '감천문화마을',
+    '白淺灘文化村': '흰여울문화마을',
+    '白淺灘': '흰여울문화마을',
+    '松島海上纜車': '송도해상케이블카',
+    '松島': '송도',
+    '太宗台': '태종대',
+    '影島': '영도',
+    '南浦洞': '남포동',
+    '南浦': '남포동',
+    '光復路': '광복로',
+    '國際市場': '국제시장',
+    '富平罐頭夜市': '부평깡통야시장',
+    '龍頭山公園': '용두산공원',
+    '釜山塔': '부산타워',
+    '青沙浦': '청사포',
+    '尾浦': '미포',
+    '藍線公園': '해운대 블루라인파크',
+    '廣安大橋': '광안대교',
+    '廣安里': '광안리',
+    '龍湖灣': '용호만',
+    '鑽石灣遊艇': '다이아몬드베이',
+    '機張': '기장',
+    '土城站': '토성역',
+    '新世界百貨': '신세계백화점',
+    '釜山市立美術館': '부산시립미술관',
+    '釜山電影殿堂': '영화의전당',
+    '電影殿堂': '영화의전당',
+    '西面': '서면'
+  };
+  const placeKeys = Object.keys(placeKorean).sort((a, b) => b.length - a.length);
+
+  function makeKoreanAnnotation(ko) {
+    const wrap = document.createElement('span');
+    wrap.className = 'ko-annot';
+    const txt = document.createElement('span');
+    txt.className = 'ko-text';
+    txt.textContent = ko;
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'korean-btn';
+    copyBtn.textContent = '📋';
+    copyBtn.title = '複製韓文';
+    copyBtn.addEventListener('click', function (e) { e.preventDefault(); copyToClipboard(ko); });
+    const sayBtn = document.createElement('button');
+    sayBtn.type = 'button';
+    sayBtn.className = 'korean-btn';
+    sayBtn.textContent = '🔊';
+    sayBtn.title = '發音';
+    sayBtn.addEventListener('click', function (e) { e.preventDefault(); speak(ko); });
+    const zoomBtn = document.createElement('button');
+    zoomBtn.type = 'button';
+    zoomBtn.className = 'korean-btn';
+    zoomBtn.textContent = '🔍';
+    zoomBtn.title = '放大顯示';
+    zoomBtn.addEventListener('click', function (e) { e.preventDefault(); showLargeKorean(ko); });
+    wrap.append('（', txt, copyBtn, sayBtn, zoomBtn, '）');
+    return wrap;
+  }
+
+  function annotateTextNode(node, used) {
+    const text = node.nodeValue;
+    const pieces = [];
+    let i = 0, lastIndex = 0, matched = false;
+    while (i < text.length) {
+      let foundKey = null;
+      for (const key of placeKeys) {
+        if (used.has(key)) continue;
+        if (text.startsWith(key, i)) { foundKey = key; break; }
+      }
+      if (foundKey) {
+        matched = true;
+        pieces.push(document.createTextNode(text.slice(lastIndex, i + foundKey.length)));
+        pieces.push(makeKoreanAnnotation(placeKorean[foundKey]));
+        used.add(foundKey);
+        i += foundKey.length;
+        lastIndex = i;
+      } else {
+        i++;
+      }
+    }
+    if (!matched) return;
+    pieces.push(document.createTextNode(text.slice(lastIndex)));
+    const parent = node.parentNode;
+    pieces.forEach(p => parent.insertBefore(p, node));
+    parent.removeChild(node);
+  }
+
+  function addKoreanAnnotations() {
+    const used = new Set(); // 每個地名整份行程只標註第一次出現，避免雜亂
+    document.querySelectorAll('.day-body').forEach(body => {
+      const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, {
+        acceptNode(n) {
+          if (!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          if (n.parentElement && n.parentElement.closest('.ko-annot')) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(n => annotateTextNode(n, used));
+    });
+  }
+
+  function removeKoreanAnnotations() {
+    document.querySelectorAll('.day-body .ko-annot').forEach(el => el.remove());
+    document.querySelectorAll('.day-body').forEach(body => body.normalize());
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
+    // 放大覆蓋層：點一下即關閉
+    const koZoomOverlay = document.getElementById('koZoomOverlay');
+    if (koZoomOverlay) {
+      koZoomOverlay.addEventListener('click', function () {
+        koZoomOverlay.classList.remove('show');
+      });
+    }
+
+    // 行程地名韓文標註開關
+    const toggle = document.getElementById('toggleKorean');
+    if (toggle) {
+      toggle.addEventListener('change', function () {
+        if (toggle.checked) addKoreanAnnotations();
+        else removeKoreanAnnotations();
+      });
+    }
+
     // 找到景点资讯速查表（包含"景點"、"韓文"、"地址"、"營業時間"等表头的表格）
     const tables = document.querySelectorAll('table.fare');
     if (tables.length === 0) return;
@@ -685,6 +871,7 @@
                   <span>${koreanText}</span>
                   <button class="korean-btn" onclick="copyToClipboard('${koreanText.replace(/'/g, "\\'")}')" title="复制韓文">📋</button>
                   <button class="korean-btn" onclick="speak('${koreanText.replace(/'/g, "\\'")}')" title="发音">🔊</button>
+                  <button class="korean-btn" onclick="showLargeKorean('${koreanText.replace(/'/g, "\\'")}')" title="放大顯示">🔍</button>
                 </div>
               `;
             }
