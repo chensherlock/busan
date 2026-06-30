@@ -166,13 +166,12 @@
   }
   .ko-zoom-overlay.show { display: flex; }
   .ko-zoom-overlay .ko-zoom-text {
-    color: #fff; font-weight: 800; line-height: 1.15; text-align: center;
-    font-size: clamp(48px, 16vw, 200px); word-break: keep-all;
+    color: #fff; font-weight: 800; line-height: 1.1; text-align: center;
+    word-break: keep-all; overflow-wrap: anywhere;
     transition: transform .25s ease;
   }
   .ko-zoom-overlay.rotated .ko-zoom-text {
     transform: rotate(90deg);
-    font-size: clamp(48px, 16vh, 220px);
   }
   .ko-zoom-overlay .ko-zoom-rotate {
     position: fixed; top: 18px; right: 18px;
@@ -719,6 +718,27 @@
     target.textContent = text;
     overlay.classList.remove('rotated');
     overlay.classList.add('show');
+    fitZoomText();
+  }
+
+  // 自動調整字體大小，避免超出螢幕（含旋轉狀態）
+  function fitZoomText() {
+    const overlay = document.getElementById('koZoomOverlay');
+    const el = document.getElementById('koZoomText');
+    if (!overlay || !el || !overlay.classList.contains('show')) return;
+    const rotated = overlay.classList.contains('rotated');
+    // 旋轉時，文字的「長軸」對應螢幕高度，「短軸」對應螢幕寬度
+    const limitW = (rotated ? window.innerHeight : window.innerWidth) * 0.9;
+    const limitH = (rotated ? window.innerWidth : window.innerHeight) * 0.8;
+    el.style.maxWidth = limitW + 'px';
+    let size = Math.min(limitW, limitH);
+    el.style.fontSize = size + 'px';
+    let guard = 0;
+    while ((el.scrollWidth > limitW || el.scrollHeight > limitH) && size > 14 && guard < 300) {
+      size -= Math.max(1, Math.floor(size * 0.05));
+      el.style.fontSize = size + 'px';
+      guard++;
+    }
   }
 
   // ---- 行程中文地名 → 韓文對照（長詞優先比對）----
@@ -866,8 +886,12 @@
       koZoomRotate.addEventListener('click', function (e) {
         e.stopPropagation();
         koZoomOverlay.classList.toggle('rotated');
+        fitZoomText();
       });
     }
+    // 畫面尺寸或旋轉變動時重新計算字體大小
+    window.addEventListener('resize', fitZoomText);
+    window.addEventListener('orientationchange', function () { setTimeout(fitZoomText, 200); });
 
     // 行程地名韓文標註開關（以 cookie 記住偏好）
     const toggle = document.getElementById('toggleKorean');
