@@ -840,6 +840,18 @@
     document.querySelectorAll('.day-body').forEach(body => body.normalize());
   }
 
+  // ---- Cookie 工具：記住是否標註韓文 ----
+  function setCookie(name, value, days) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+  }
+  function getCookie(name) {
+    return document.cookie.split('; ').reduce(function (acc, cur) {
+      const parts = cur.split('=');
+      return parts[0] === name ? decodeURIComponent(parts.slice(1).join('=')) : acc;
+    }, '');
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     // 放大覆蓋層：點一下即關閉
     const koZoomOverlay = document.getElementById('koZoomOverlay');
@@ -857,12 +869,17 @@
       });
     }
 
-    // 行程地名韓文標註開關
+    // 行程地名韓文標註開關（以 cookie 記住偏好）
     const toggle = document.getElementById('toggleKorean');
     if (toggle) {
+      if (getCookie('annotateKorean') === '1') {
+        toggle.checked = true;
+        addKoreanAnnotations();
+      }
       toggle.addEventListener('change', function () {
         if (toggle.checked) addKoreanAnnotations();
         else removeKoreanAnnotations();
+        setCookie('annotateKorean', toggle.checked ? '1' : '0', 365);
       });
     }
 
