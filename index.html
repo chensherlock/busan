@@ -168,7 +168,19 @@
   .ko-zoom-overlay .ko-zoom-text {
     color: #fff; font-weight: 800; line-height: 1.15; text-align: center;
     font-size: clamp(48px, 16vw, 200px); word-break: keep-all;
+    transition: transform .25s ease;
   }
+  .ko-zoom-overlay.rotated .ko-zoom-text {
+    transform: rotate(90deg);
+    font-size: clamp(48px, 16vh, 220px);
+  }
+  .ko-zoom-overlay .ko-zoom-rotate {
+    position: fixed; top: 18px; right: 18px;
+    background: rgba(255,255,255,.14); color: #fff;
+    border: 1px solid rgba(255,255,255,.5); border-radius: 999px;
+    padding: 10px 18px; font-size: 16px; font-weight: 700; cursor: pointer;
+  }
+  .ko-zoom-overlay .ko-zoom-rotate:active { transform: scale(.96); }
   .ko-zoom-overlay .ko-zoom-hint { color: #cbd5e1; font-size: 14px; }
   @media print {
     .controls { display: none !important; }
@@ -185,8 +197,9 @@
 </label>
 
 <div class="ko-zoom-overlay" id="koZoomOverlay">
+  <button type="button" class="ko-zoom-rotate" id="koZoomRotate" title="旋轉 90°">↻ 旋轉 90°</button>
   <div class="ko-zoom-text" id="koZoomText"></div>
-  <div class="ko-zoom-hint">點一下任意處關閉</div>
+  <div class="ko-zoom-hint">點一下任意處關閉（旋轉鈕除外）</div>
 </div>
 
 <div class="cover">
@@ -704,6 +717,7 @@
     const target = document.getElementById('koZoomText');
     if (!overlay || !target) return;
     target.textContent = text;
+    overlay.classList.remove('rotated');
     overlay.classList.add('show');
   }
 
@@ -832,6 +846,14 @@
     if (koZoomOverlay) {
       koZoomOverlay.addEventListener('click', function () {
         koZoomOverlay.classList.remove('show');
+      });
+    }
+    // 旋轉 90°按鈕（方便橫著填滿手機畫面）
+    const koZoomRotate = document.getElementById('koZoomRotate');
+    if (koZoomRotate && koZoomOverlay) {
+      koZoomRotate.addEventListener('click', function (e) {
+        e.stopPropagation();
+        koZoomOverlay.classList.toggle('rotated');
       });
     }
 
